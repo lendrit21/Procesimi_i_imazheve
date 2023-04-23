@@ -1,0 +1,84 @@
+ % Ngarkimi i paketes se imazheve 
+   pkg load image
+  
+ % Ngarkimi i nje imazhit
+   color_img = imread('lena.png');
+
+ % Ekstraktimi i kanaleve te ngjyrave
+   red_channel = color_img(:,:,1);
+   green_channel = color_img(:,:,2);
+   blue_channel = color_img(:,:,3);
+
+ % Shfaqja e kanalit te ngjyrave
+   subplot(2,2,1), imshow(color_img), title('Original Image');
+   subplot(2,2,2), imshow(red_channel), title('Red Channel');
+   subplot(2,2,3), imshow(green_channel), title('Green Channel');
+   subplot(2,2,4), imshow(blue_channel), title('Blue Channel');
+
+ % Konvertoni imazhin në shkallë gri (grayscale)
+   img_gray = 0.2989 * color_img(:,:,1) + 0.5870 * color_img(:,:,2) + 0.1140 * color_img(:,:,3);
+
+ % Shfaqe imazhin ne shkallen gri (grayscale) 
+   imshow(img_gray);
+
+ % Pragu i imazhit
+   threshold = 128;
+   img_binary = img_gray > threshold;
+
+ % Shfaqe imazhin binar
+   imshow(img_binary);
+
+ % Inverto imazhin binar
+   img_binary_inverted = !img_binary;
+
+ % Shfaq imazhin e invertuar
+   imshow(img_binary_inverted);
+
+ % Krijo një element strukturor në formë disku me rreze 5
+   se = strel('disk', 5, 0);
+
+ % Kryeni zgjerimin në imazhin binar
+   img_binary_dilated = imdilate(img_binary, se);
+
+ % Shfaq imazhin e zgjeruar
+   imshow(img_binary_dilated);
+
+ % Mbush vrimat në imazhin binar
+   img_binary_filled = imfill(img_binary, 'holes');
+
+ % Shfaq imazhin e mbushur
+   imshow(img_binary_filled);
+
+ % Ekstraktoni komponentët e lidhur nga imazhi binar
+   [labels, num_labels] = bwlabel(img_binary);
+
+ % Shfaq imazhin e etiketuar
+   imshow(label2rgb(labels));
+
+ % Ekstraktoni kufijtë e objekteve në imazhin binar
+   img_binary_boundaries = bwperim(img_binary);
+
+ % Shfaqni imazhin me kufij
+   imshow(img_binary_boundaries);
+
+ % Krijo një imazh binar me një rreth
+   [xx,yy] = ndgrid((1:size(img_binary,1))-size(img_binary,1)/2,(1:size(img_binary,2))-size(img_binary,2)/2);
+   img_circle = sqrt(xx.^2+yy.^2)<=50;
+
+ % Kryeni operacionin DHE në imazhin binar dhe rrethin
+   img_binary_and = img_binary & img_circle;
+
+ % Kryeni operacionin OSE në imazhin binar dhe rrethin
+   img_binary_or = img_binary | img_circle;
+
+ % Kryeni operacionin XOR në imazhin binar dhe rrethin
+   img_binary_xor = xor(img_binary, img_circle);
+
+ % Shfaqni imazhet
+   subplot(2,2,1); imshow(img_binary);
+   subplot(2,2,2); imshow(img_circle);
+   subplot(2,2,3); imshow(img_binary_and);
+   subplot(2,2,4); imshow(img_binary_or);
+
+ % Ruani imazhin binar në një skedar
+   imwrite(img_binary, 'binary_image.png');

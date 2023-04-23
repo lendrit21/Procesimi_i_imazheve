@@ -1,0 +1,100 @@
+ Kodi per imazhin e pare
+
+%importimi i paketes per imazhe
+ pkg load image
+
+% Ngarkon imazhin nga fajlli
+imazhi = imread('figura.jpg');
+imshow(imazhi);
+
+% Ndryshoni imazhin nga RGB në grayscale
+imazhi_rgb = ind2rgb(imazhi, gray(256));
+imazhi_grayscale = rgb2gray(imazhi_rgb);
+imshow(imazhi_grayscale);
+
+% Përcaktojme operatorët delta_x, delta_y, underdelta_x dhe underdelta_y
+delta_x = [1, 0, -1; 0, 0, 0; -1, 0, 1];
+delta_y = [1, 0, -1; 0, 0, 0; -1, 0, 1];
+underdelta_x = [1, 0, -1; 0, 0, 0; -1, 0, 1];
+underdelta_y = [1, 1, 0; 0, 0, 0; 0, -1, -1];
+
+% Përcaktojme vlerën e sigma
+sigma = 1;
+
+% Llogarisim derivatin e dytë duke përdorur diferencën përpara dhe prapa
+d2x = conv2(imazhi_grayscale, delta_x, 'same');
+d2x = conv2(d2x, underdelta_x, 'same');
+d2y = conv2(imazhi_grayscale, delta_y, 'same');
+d2y = conv2(d2y, underdelta_y, 'same');
+
+% Llogarisim operatorin e derivatit të dytë bazuar në rregullat e derivimit
+operator = sigma^2 * conv2(d2x.^2, ones(3), 'same') / sigma^2 * conv2(d2y.^2, ones(3), 'same');
+
+% Filtrojme imazhin me operatorin e Laplasit dhe atë që është gjetur më lartë
+imazhi_laplace = imfilter(imazhi_grayscale, fspecial('laplacian'), 'replicate');
+imazhi_operator = imfilter(imazhi_grayscale, operator, 'replicate');
+
+% Tregojme dallimin në mes të imazhit të filtruar me anë të dy operatorëve
+figure;
+%shfaqja e imazhit te laplasit
+imshow(imazhi_laplace);
+title('Filtruar me operatorin e Laplasit');
+
+figure;
+%shfaqja e imazhit te operatorit
+imshow(imazhi_operator);
+title('Filtruar me operatorin e gjetur');
+
+% Tregojme arsyet e dallimit të këtyre dy imazheve të filtruara
+% Imazhi i filtruar me operatorin e Laplasit është shumë i ndjeshëm ndaj zhvendosjeve dhe ka tendencë për të prodhuar
+% shumë kufizime. Ndërsa imazhi i filtruar me operatorin e gjetur është më i qëndrueshëm ndaj zhvendosjeve
+% dhe prodhon më pak kufizime.
+
+   Kodi per imazhin e dyte
+
+
+
+%importimi i paketes per imazhe
+ pkg load image
+
+% Ngarkon imazhin nga fajlli
+imazhi = imread('lena_gaussian_noise.tif');
+imshow(imazhi);
+
+% Ndryshoni imazhin nga RGB në grayscale
+imazhi_rgb = ind2rgb(imazhi, gray(256));
+imazhi_grayscale = rgb2gray(imazhi_rgb);
+imshow(imazhi_grayscale);
+
+% Përcaktojme operatorët delta_x, delta_y, underdelta_x dhe underdelta_y
+delta_x = [1, 0, -1; 0, 0, 0; -1, 0, 1];
+delta_y = [1, 0, -1; 0, 0, 0; -1, 0, 1];
+underdelta_x = [1, 0, -1; 0, 0, 0; -1, 0, 1];
+underdelta_y = [1, 1, 0; 0, 0, 0; 0, -1, -1];
+
+% Përcaktojme vlerën e sigma
+sigma = 1;
+
+% Llogarisim derivatin e dytë duke përdorur diferencën përpara dhe prapa
+d2x = conv2(imazhi_grayscale, delta_x, 'same');
+d2x = conv2(d2x, underdelta_x, 'same');
+d2y = conv2(imazhi_grayscale, delta_y, 'same');
+d2y = conv2(d2y, underdelta_y, 'same');
+
+% Llogarisim operatorin e derivatit të dytë bazuar në rregullat e derivimit
+operator = sigma^2 * conv2(d2x.^2, ones(3), 'same') / sigma^2 * conv2(d2y.^2, ones(3), 'same');
+
+% Filtrojme imazhin me operatorin e Laplasit dhe atë që është gjetur më lartë
+imazhi_laplace = imfilter(imazhi_grayscale, fspecial('laplacian'), 'replicate');
+imazhi_operator = imfilter(imazhi_grayscale, operator, 'replicate');
+
+% Tregojme dallimin në mes të imazhit të filtruar me anë të dy operatorëve
+figure;
+%shfaqja e imazhit te laplasit
+imshow(imazhi_laplace);
+title('Filtruar me operatorin e Laplasit');
+
+figure;
+%shfaqja e imazhit te operatorit
+imshow(imazhi_operator);
+title('Filtruar me operatorin e gjetur (sigma)');
