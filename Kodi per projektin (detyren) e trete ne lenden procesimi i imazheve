@@ -1,0 +1,104 @@
+   % Krijimi i funksionit ‘zhurma’ i cili do të gjenerojë zhurmën me shpërndarje të Rayleigh,
+   Eksponenciale, LogNormal, Salt&Pepper dhe Erlang.
+ 
+   function noise = zhurma(shperndarja, x, y, z, k, s, a, b)
+    img = zeros(size(x,2),size(y,2),s);
+    switch shperndarja
+      case 'Rayleigh'
+          for i=1:s
+              img(:,:,i)=imnoise(img(:,:,i),'gaussian',0,(x-y)/sqrt(2));
+          end
+          noise = img;
+      case 'Eksponenciale'
+          for i=1:s
+              img(:,:,i)=imnoise(img(:,:,i),'poisson');
+          end
+          noise = img;
+      case 'LogNormal'
+          for i=1:s
+              img(:,:,i)=imnoise(img(:,:,i),'lognorm',a,b);
+          end
+          noise = img;
+      case 'Salt&Pepper'
+          for i=1:s
+              img(:,:,i)=imnoise(img(:,:,i),'salt & pepper',a);
+          end
+          noise = img;
+      case 'Erlang'
+          for i=1:s
+              img(:,:,i)=imnoise(img(:,:,i),'gaussian',0,(x-y)/sqrt(2));
+          end
+          noise = img;
+        otherwise
+            disp('Shperndarja e zgjedhur nuk eshte valide');
+       end
+     end
+    % Perfundimi i funksionit
+
+        %paketa per ngarkimin e imazheve
+           pkg load image
+        %ngarkimi i imazhit lena
+         lena=imread('lena.png');
+         [m,n,~] = size(lena); %gjeneron madhesine e imazhit ne 3 dimensione
+         [x,y] = meshgrid(1:n,1:m);
+
+     % gjeneron zhurmen periodike me te njejtat dimensione si lena
+      noise_periodike = 20*cos((pi*x)/3+(pi*y)/7) + 23*sin((pi*x)/3+(pi*y)/8);
+
+    % shton zhurmen ne secilin kanal me ngjyra veq e veq dhe e konverton ne dyfish
+     lena_noisy_periodike = double(lena);
+     lena_noisy_periodike(:,:,1) = lena_noisy_periodike(:,:,1) + noise_periodike;
+     lena_noisy_periodike(:,:,2) = lena_noisy_periodike(:,:,2) + noise_periodike;
+     lena_noisy_periodike(:,:,3) = lena_noisy_periodike(:,:,3) + noise_periodike;
+
+    % llogarit FFT 2D te imazhit te zhurmshem lena
+     lena_noisy_periodike_fft = fft2(lena_noisy_periodike);
+
+   % shfaqim tre imazhe te ngarkuara me zhurme periodike
+     noise_periodike_img =imshow(noise_periodike);
+     lena_noisy_periodike_img =imshow(lena_noisy_periodike);
+     lena_noisy_periodike_fft_img =imshow(lena_noisy_periodike_fft);
+
+    % largojme zhurmen periodike ne imazhin lena
+      H = ones(m,n);
+     filt = fftshift(ifft2(ifftshift(H)));
+     lena_restored = real(ifft2(fft2(lena_noisy_periodike).*fftshift(filt)));
+
+     %shfaqim imazhin lena pas largimit te zhurmes periodike
+      lena_img_without_periodic_noise=imshow(uint8(lena_restored));
+      lena_img_without_periodic_noise=imshow(uint8(lena_restored));
+
+    %Krijimi i funksionit qe ben filtrimin 
+      function [H, D] = create_filter(m, n, u0, v0, D0)
+      H = ones(m, n);
+      D = zeros(m, n);
+       for u = 1:m
+         for v = 1:n
+            D(u, v) = sqrt((u - m/2 - 1)^2 + (v - n/2 - 1)^2);
+            H(u, v) = 1 - exp(-1/2 * (D(u, v)*D(u, v))/(D0*D0));
+          endfor
+      endfor
+    % Zhvendosni filtrin në mënyrë që qendra të jetë në (u0, v0)
+      H = circshift(H, [u0 - m/2 - 1, v0 - n/2 - 1]);
+    endfunction
+
+    %perfundimi i funksionit
+
+    % Lexon imazhet binare
+     binary_image = imread('Figura 2.jpg');
+     binary_image_processed = imread('Figura 3.jpg');
+
+     % Krijoni elementin strukturor
+       SE = strel('square', 3);
+
+    % Kryen operacionin e erozionit në imazhin binar origjinal
+     binary_image_eroded = imerode(binary_image, SE);
+
+    % Kryen operacionin e dilitimit në imazhin binar të përpunuar
+     binary_image_processed_dilated = imdilate(binary_image_processed, SE);
+
+    % Gjeni ndryshimin midis imazhit të përpunuar dhe imazhit të përpunuar të dilituar
+     diff = imabsdiff(binary_image_processed, binary_image_processed_dilated);
+
+    % Tregon imazhin e ndryshimit
+     figure, imshow(diff)
